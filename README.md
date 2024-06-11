@@ -28,6 +28,12 @@ To get started with this project, follow these steps:
    Please enter the Shopify order ID: 5891325493548
    ```
 
+5. **Lists all the orders associated with the shopify account**
+
+   ```
+   yarn orders
+   ```
+
 ## Configure Environment variables
 
 Create a file named .env and put the below code. Replace the values with the actual credentials from email.
