@@ -23,76 +23,48 @@ async function integrateShopifyToPipedrive(orderId) {
       );
     }
 
-    console.log('Order found, Finding the person in pipedrive ...');
+    console.log('Order found, Finding the customer in pipedrive ...');
     let person = await findPersonByEmail(customer.email);
 
     if (!person) {
-      console.log('Person not found in Pipedrive, Creating new person ...');
+      console.log('Customer not found in Pipedrive, Creating new customer ...');
       person = await createPerson({
         name: `${customer.first_name} ${customer.last_name}`,
         email: customer.email,
         phone: customer.phone,
       });
-      console.log('New person has been created : ', {
-        name: person.name,
-        email: person.email[0].value,
-        phone: person.phone[0].value,
-      });
-    } else {
-      console.log('Person found : ', {
-        name: person.item.name,
-        email: person.item.emails[0],
-        phone: person.item.phones[0],
-      });
     }
-
-    console.log(
-      `Creating a deal for ${customer.first_name} ${customer.last_name} ...`
-    );
 
     const deal = await createDeal({
       title: `${customer.first_name} ${customer.last_name}`,
     });
-
-    console.log(`Deal has been created with title :`, deal.title);
 
     console.log('Finding the shopify products in pipedrive ...');
 
     for (const item of order.line_items) {
       if (!item.sku) {
         throw new Error(
-          'Cannot find or create product, Product SKU is missing.'
+          "Couldn't find or create product, Product SKU is missing."
         );
       }
-      console.log('Finding product ...', { name: item.name, code: item.sku });
-      let product = await findProductByCode(item.sku);
+
+      let product = await findProductByCode(item);
 
       if (!product) {
-        console.log('Product not found, Creating product ...', {
-          name: item.name,
-          code: item.sku,
-        });
         product = await createProduct({
           name: item.name,
           code: item.sku,
           prices: [{ price: item.price, currency: 'INR' }],
         });
-        console.log('Product created - ', product);
-      } else {
-        console.log('Product found with code - ', product.item.code);
       }
-      console.log(
-        `Adding product to deal ${deal.title} (Deal ID : ${deal.id}) - product ID : ${product.item.id}`
-      );
-      let attachment = await attachProductToDeal(
+
+      console.log(`Adding product ${product.name} (${product.id}) to deal ...`);
+
+      await attachProductToDeal(
         deal.id,
-        product.item.id,
+        product.id,
         parseFloat(item.price),
         item.quantity
-      );
-      console.log(
-        'Successfully attached product to the Deal with attachment ID :',
-        attachment.id
       );
     }
 

@@ -12,10 +12,16 @@ async function findPersonByEmail(email) {
         },
       }
     );
-    if (response.data.data.items) {
-      return response.data.data.items[0];
+    if (response.data.data.items.length) {
+      const data = response.data.data.items[0];
+      console.log('Person found : ', {
+        name: data.item.name,
+        email: data.item.emails[0],
+        phone: data.item.phones[0],
+      });
+      return data;
     } else {
-      throw new Error(`No person found with email ${email}`);
+      console.log(`No person found with email ${email}`);
     }
   } catch (error) {
     console.log("Couldn't find the person in pipedrive", error.message);
@@ -32,29 +38,39 @@ async function createPerson(person) {
         params: { api_token: process.env.PIPEDRIVE_TOKEN },
       }
     );
-    return response.data.data;
+    let data = response.data.data;
+    console.log('New Customer has been created : ', {
+      name: data.name,
+      email: data.email[0].value,
+      phone: data.phone[0].value,
+    });
+    return data;
   } catch (error) {
-    throw new Error(`Failed to create person: ${error.message}`);
+    throw new Error(`Failed to create customer: ${error.message}`);
   }
 }
 
-async function findProductByCode(code) {
+async function findProductByCode(item) {
   try {
+    const { sku, name, price } = item;
+    console.log('Finding product ...', { name, sku, price });
     const response = await axios.get(
       `${process.env.PIPEDRIVE_DOMAIN}/products/search`,
       {
         params: {
-          term: code,
+          term: sku,
           fields: 'code',
           api_token: process.env.PIPEDRIVE_TOKEN,
           exact_match: true,
         },
       }
     );
-    if (response.data.data.items) {
-      return response.data.data.items[0];
+    if (response.data.data.items.length) {
+      const data = response.data.data.items[0].item;
+      console.log('Product found with code - ', data.code);
+      return data;
     } else {
-      throw new Error(`No product found with code ${code}`);
+      console.log(`No product found with code (SKU) ${sku}`);
     }
   } catch (error) {
     throw new Error(`Failed to find product: ${error.message}`);
@@ -62,6 +78,10 @@ async function findProductByCode(code) {
 }
 
 async function createProduct(product) {
+  console.log('Creating product ...', {
+    name: product.name,
+    code: product.code,
+  });
   try {
     const response = await axios.post(
       `${process.env.PIPEDRIVE_DOMAIN}/products`,
@@ -71,8 +91,8 @@ async function createProduct(product) {
       }
     );
     if (response.data.data) {
-      const { name, code, prices } = response.data.data;
-      return { name, code, price: prices[0].price };
+      console.log('Product created - ', response.data.data.name);
+      return response.data.data;
     } else {
       throw new Error(`Couldn't create product.`);
     }
@@ -82,6 +102,7 @@ async function createProduct(product) {
 }
 
 async function createDeal(deal) {
+  console.log(`Creating deal for customer ${deal.title} ...`);
   try {
     const response = await axios.post(
       `${process.env.PIPEDRIVE_DOMAIN}/deals`,
@@ -90,7 +111,11 @@ async function createDeal(deal) {
         params: { api_token: process.env.PIPEDRIVE_TOKEN },
       }
     );
-    return response.data.data;
+    if (response.data.data) {
+      const data = response.data.data;
+      console.log(`Deal has been created with title :`, data.title);
+      return data;
+    }
   } catch (error) {
     throw new Error(`Failed to create deal: ${error.message}`);
   }
@@ -108,6 +133,10 @@ async function attachProductToDeal(dealId, product_id, item_price, quantity) {
       {
         params: { api_token: process.env.PIPEDRIVE_TOKEN },
       }
+    );
+    console.log(
+      'Successfully attached product to the Deal with attachment ID :',
+      response.data.data.id
     );
     return response.data.data;
   } catch (error) {
