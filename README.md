@@ -10,25 +10,31 @@ To get started with this project, follow these steps:
    git clone https://github.com/ghritak/shopify-pipedrive.git
    ```
 
-2. **Install dependencies**
+2. **Navigate into the Project directory**
+
+   ```
+   cd shopify-pipedrive
+   ```
+
+3. **Install dependencies**
 
    ```
    yarn install
    ```
 
-3. **Run the integration program**
+4. **Run the integration program**
 
    ```
    yarn start
    ```
 
-4. **Enter the Shopify Order ID in the prompt like below**
+5. **Enter the Shopify Order ID in the prompt like below**
 
    ```
    Please enter the Shopify order ID: 5891325493548
    ```
 
-5. **Lists all the orders associated with the shopify account**
+6. **Lists all the orders associated with the shopify account**
 
    ```
    yarn orders
