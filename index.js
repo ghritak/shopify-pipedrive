@@ -20,7 +20,7 @@ const rl = readline.createInterface({
 
 async function integrateShopifyToPipedrive(orderId) {
   try {
-    console.log('Fetching the order from shopify ...');
+    console.log(`Fetching order ${orderId} from shopify ...`);
 
     // Featch the shopify order details by the given order ID
     const order = await getOrder(orderId);
@@ -32,13 +32,15 @@ async function integrateShopifyToPipedrive(orderId) {
       );
     }
 
-    console.log('Order found, Finding the customer in pipedrive ...');
+    console.log('Order found, Finding the customer by email in pipedrive ...');
 
     // Find the shopify customer in pipedrive by email
     let person = await findPersonByEmail(customer.email);
 
     if (!person) {
-      console.log('Customer not found in Pipedrive, Creating new customer ...');
+      console.log(
+        `Customer not found in Pipedrive, Creating customer ${customer.first_name} ${customer.last_name} ...`
+      );
 
       // Create a new customer if the shopify customer doesn't exist in pipedrive
       person = await createPerson({
@@ -48,12 +50,9 @@ async function integrateShopifyToPipedrive(orderId) {
       });
     }
 
-    // Create a new deal for the customer
-    const deal = await createDeal({
-      title: `${customer.first_name} ${customer.last_name}`,
-    });
-
     console.log('Finding the shopify products in pipedrive ...');
+
+    let globalProducts = [];
 
     // Loop through all the ordered items from the shopify order line_items
     for (const item of order.line_items) {
@@ -74,17 +73,30 @@ async function integrateShopifyToPipedrive(orderId) {
           prices: [{ price: item.price, currency: 'INR' }],
         });
       }
+      globalProducts.push({
+        ...product,
+        quantity: item.quantity,
+        price: item.price,
+      });
+    }
 
+    // Create a new deal for the customer
+    const deal = await createDeal({
+      title: `${customer.first_name} ${customer.last_name}`,
+    });
+
+    // Attach all the products to the newly created deal
+    for (const product of globalProducts) {
       console.log(`Adding product ${product.name} (${product.id}) to deal ...`);
-
-      // Attach products to the newly created deal
       await attachProductToDeal(
         deal.id,
         product.id,
-        parseFloat(item.price),
-        item.quantity
+        parseFloat(product.price),
+        product.quantity
       );
     }
+
+    console.log('Successfully attached products to the Deal.');
 
     // Integration process has been completed, Exit from the process
     return 'Process completed';

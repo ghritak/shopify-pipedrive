@@ -91,7 +91,6 @@ async function createProduct(product) {
       }
     );
     if (response.data.data) {
-      console.log('Product created - ', response.data.data.name);
       return response.data.data;
     } else {
       throw new Error(`Couldn't create product.`);
@@ -133,10 +132,6 @@ async function attachProductToDeal(dealId, product_id, item_price, quantity) {
       {
         params: { api_token: process.env.PIPEDRIVE_TOKEN },
       }
-    );
-    console.log(
-      'Successfully attached product to the Deal with attachment ID :',
-      response.data.data.id
     );
     return response.data.data;
   } catch (error) {
