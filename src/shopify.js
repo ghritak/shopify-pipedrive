@@ -10,8 +10,12 @@ async function getOrder(orderId) {
         },
       }
     );
+
     return response.data.order;
   } catch (error) {
+    if (error.response.status === 404) {
+      throw new Error(`Not found, Order with ID ${orderId} doesn't exist.`);
+    }
     throw new Error(`Failed to fetch order: ${error.message}`);
   }
 }
