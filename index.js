@@ -73,6 +73,8 @@ async function integrateShopifyToPipedrive(orderId) {
           prices: [{ price: item.price, currency: 'INR' }],
         });
       }
+
+      // Storing all the product created or found from pipedirve
       globalProducts.push({
         ...product,
         quantity: item.quantity,
@@ -108,11 +110,13 @@ async function integrateShopifyToPipedrive(orderId) {
 
 function promptOrderId() {
   rl.question('Please enter the Shopify order ID: ', (orderId) => {
+    // Checking wheather orderId is valid or not
     if (!isValidOrderId(orderId)) {
       rl.close();
       return;
     }
 
+    // Running the integration process
     integrateShopifyToPipedrive(orderId)
       .then((result) => {
         console.log(result);

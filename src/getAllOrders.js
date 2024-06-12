@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
+// Fetch all the order from shopify store
 async function getAllOrder() {
   try {
     const response = await axios.get(
@@ -22,8 +23,11 @@ async function getAllOrder() {
         orders.length,
         'orders found\n------------------------------------------------------------------\n'
       );
+      // Looping through all the Shopify orders
       orders.forEach((order) => {
         console.log('ID :', order.id);
+
+        // Looping through each order item
         order.line_items.forEach((item) => {
           console.log({
             name: item.name,
@@ -37,6 +41,7 @@ async function getAllOrder() {
       });
     }
 
+    // Fetching data completed
     return 'Success';
   } catch (error) {
     if (error?.response?.status === 404) {

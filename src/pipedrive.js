@@ -1,5 +1,6 @@
 const axios = require('axios');
 
+// Find a person contact in pipedrive using email
 async function findPersonByEmail(email) {
   try {
     const response = await axios.get(
@@ -29,6 +30,7 @@ async function findPersonByEmail(email) {
   }
 }
 
+// Create a person contact in pipedrive using name, email and phone
 async function createPerson(person) {
   try {
     const response = await axios.post(
@@ -50,6 +52,7 @@ async function createPerson(person) {
   }
 }
 
+// Find a product in pipedrive using the SKU (code) found from shopify order item
 async function findProductByCode(item) {
   try {
     const { sku, name, price } = item;
@@ -77,6 +80,7 @@ async function findProductByCode(item) {
   }
 }
 
+// Create a product in pipedrive using name, code (SKU), price
 async function createProduct(product) {
   console.log('Creating product ...', {
     name: product.name,
@@ -100,6 +104,7 @@ async function createProduct(product) {
   }
 }
 
+// Create a deal in pipedrive for customer found from shopify order
 async function createDeal(deal) {
   console.log(`Creating deal for customer ${deal.title} ...`);
   try {
@@ -120,6 +125,7 @@ async function createDeal(deal) {
   }
 }
 
+// Adding pipedrive product to customer deal
 async function attachProductToDeal(dealId, product_id, item_price, quantity) {
   try {
     const response = await axios.post(
